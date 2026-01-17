@@ -12,6 +12,7 @@ use App\Models\Event;
 use App\Models\EmergencyRequest;
 use App\Models\AdminAction;
 use App\Models\Category;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -306,5 +307,151 @@ class AdminController extends Controller
             ->paginate($request->get('per_page', 50));
 
         return response()->json($logs);
+    }
+
+    // Reports
+    public function reports(Request $request)
+    {
+        $period = $request->get('period', 'month'); // week, month, year
+        
+        // Date range based on period
+        $startDate = match($period) {
+            'week' => now()->startOfWeek(),
+            'year' => now()->startOfYear(),
+            default => now()->startOfMonth(),
+        };
+
+        // Booking Stats
+        $bookingStats = [
+            'total' => Event::where('created_at', '>=', $startDate)->count(),
+            'confirmed' => Event::where('created_at', '>=', $startDate)->where('status', 'confirmed')->count(),
+            'completed' => Event::where('created_at', '>=', $startDate)->where('status', 'completed')->count(),
+            'cancelled' => Event::where('created_at', '>=', $startDate)->where('status', 'cancelled')->count(),
+            'emergency' => Event::where('created_at', '>=', $startDate)->where('has_emergency', true)->count(),
+        ];
+
+        // Revenue Breakdown
+        $revenueStats = [
+            'total_booking_value' => Event::where('created_at', '>=', $startDate)
+                ->whereIn('status', ['confirmed', 'completed'])
+                ->sum('total_amount'),
+            'assurance_fees' => Event::where('created_at', '>=', $startDate)
+                ->whereIn('status', ['confirmed', 'completed'])
+                ->sum('assurance_fee'),
+            'platform_commission' => Event::where('created_at', '>=', $startDate)
+                ->whereIn('status', ['confirmed', 'completed'])
+                ->sum('platform_commission'),
+        ];
+        $revenueStats['platform_revenue'] = $revenueStats['assurance_fees'] + $revenueStats['platform_commission'];
+
+        // Vendor Performance
+        $topVendors = Vendor::with('user')
+            ->withCount(['eventVendors as completed_events' => function ($q) use ($startDate) {
+                $q->where('status', 'completed')
+                  ->where('created_at', '>=', $startDate);
+            }])
+            ->orderBy('completed_events', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(fn($v) => [
+                'id' => $v->id,
+                'business_name' => $v->business_name,
+                'category' => $v->category,
+                'reliability_score' => $v->reliability_score,
+                'completed_events' => $v->completed_events,
+            ]);
+
+        // Emergency Stats
+        $emergencyStats = [
+            'total' => EmergencyRequest::where('created_at', '>=', $startDate)->count(),
+            'resolved' => EmergencyRequest::where('created_at', '>=', $startDate)->where('status', 'resolved')->count(),
+            'avg_resolution_time' => round(EmergencyRequest::where('created_at', '>=', $startDate)
+                ->whereNotNull('resolution_time_minutes')
+                ->avg('resolution_time_minutes') ?? 0, 1),
+        ];
+        $emergencyStats['resolution_rate'] = $emergencyStats['total'] > 0 
+            ? round(($emergencyStats['resolved'] / $emergencyStats['total']) * 100, 1) 
+            : 100;
+
+        // Category Breakdown
+        $categoryStats = Vendor::selectRaw('category, COUNT(*) as vendor_count')
+            ->verified()
+            ->active()
+            ->groupBy('category')
+            ->get()
+            ->map(fn($c) => [
+                'category' => $c->category,
+                'vendor_count' => $c->vendor_count,
+            ]);
+
+        // User Growth
+        $userStats = [
+            'total_users' => User::count(),
+            'new_users' => User::where('created_at', '>=', $startDate)->count(),
+            'total_vendors' => Vendor::count(),
+            'new_vendors' => Vendor::where('created_at', '>=', $startDate)->count(),
+        ];
+
+        return response()->json([
+            'period' => $period,
+            'start_date' => $startDate->toDateString(),
+            'booking_stats' => $bookingStats,
+            'revenue_stats' => $revenueStats,
+            'top_vendors' => $topVendors,
+            'emergency_stats' => $emergencyStats,
+            'category_stats' => $categoryStats,
+            'user_stats' => $userStats,
+        ]);
+    }
+
+    // Settings
+    public function getSettings()
+    {
+        return response()->json([
+            'settings' => Setting::getAllSettings(),
+        ]);
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $validated = $request->validate([
+            'platform_name' => ['sometimes', 'string', 'max:255'],
+            'support_email' => ['sometimes', 'email', 'max:255'],
+            'support_phone' => ['sometimes', 'string', 'max:50'],
+            'assurance_fee_percent' => ['sometimes', 'numeric', 'min:0', 'max:100'],
+            'commission_percent' => ['sometimes', 'numeric', 'min:0', 'max:100'],
+            'advance_percent' => ['sometimes', 'numeric', 'min:0', 'max:100'],
+            'emergency_bonus_multiplier' => ['sometimes', 'numeric', 'min:1', 'max:5'],
+            'emergency_window_hours' => ['sometimes', 'integer', 'min:1', 'max:48'],
+            'max_backup_assignments' => ['sometimes', 'integer', 'min:1', 'max:10'],
+            'default_reliability_score' => ['sometimes', 'numeric', 'min:1', 'max:5'],
+            'min_backup_score' => ['sometimes', 'numeric', 'min:1', 'max:5'],
+            'auto_verify_vendors' => ['sometimes', 'boolean'],
+        ]);
+
+        $typeMap = [
+            'platform_name' => ['type' => 'string', 'group' => 'general'],
+            'support_email' => ['type' => 'string', 'group' => 'general'],
+            'support_phone' => ['type' => 'string', 'group' => 'general'],
+            'assurance_fee_percent' => ['type' => 'float', 'group' => 'financial'],
+            'commission_percent' => ['type' => 'float', 'group' => 'financial'],
+            'advance_percent' => ['type' => 'float', 'group' => 'financial'],
+            'emergency_bonus_multiplier' => ['type' => 'float', 'group' => 'emergency'],
+            'emergency_window_hours' => ['type' => 'integer', 'group' => 'emergency'],
+            'max_backup_assignments' => ['type' => 'integer', 'group' => 'emergency'],
+            'default_reliability_score' => ['type' => 'float', 'group' => 'vendor'],
+            'min_backup_score' => ['type' => 'float', 'group' => 'vendor'],
+            'auto_verify_vendors' => ['type' => 'boolean', 'group' => 'vendor'],
+        ];
+
+        foreach ($validated as $key => $value) {
+            $meta = $typeMap[$key] ?? ['type' => 'string', 'group' => 'general'];
+            Setting::setValue($key, $value, $meta['type'], $meta['group']);
+        }
+
+        return response()->json([
+            'message' => 'Settings updated successfully',
+            'settings' => Setting::getAllSettings(),
+        ]);
     }
 }

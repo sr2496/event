@@ -13,17 +13,11 @@
 
         <!-- Role Tabs -->
         <div class="role-tabs">
-          <button 
-            :class="['role-tab', form.role === 'client' && 'active']"
-            @click="form.role = 'client'"
-          >
+          <button :class="['role-tab', form.role === 'client' && 'active']" @click="form.role = 'client'">
             <span>🎉</span>
             <span>I'm a Client</span>
           </button>
-          <button 
-            :class="['role-tab', form.role === 'vendor' && 'active']"
-            @click="form.role = 'vendor'"
-          >
+          <button :class="['role-tab', form.role === 'vendor' && 'active']" @click="form.role = 'vendor'">
             <span>📷</span>
             <span>I'm a Vendor</span>
           </button>
@@ -32,79 +26,62 @@
         <form @submit.prevent="handleRegister" class="auth-form">
           <div class="form-group">
             <label for="name">Full Name</label>
-            <input 
-              type="text" 
-              id="name" 
-              v-model="form.name" 
-              class="input"
-              placeholder="John Doe"
-              required
-              :disabled="loading"
-            />
+            <input type="text" id="name" v-model="form.name" class="input" placeholder="John Doe" required
+              :disabled="loading" />
           </div>
 
           <div class="form-group">
             <label for="email">Email Address</label>
-            <input 
-              type="email" 
-              id="email" 
-              v-model="form.email" 
-              class="input"
-              placeholder="your@email.com"
-              required
-              :disabled="loading"
-            />
+            <input type="email" id="email" v-model="form.email" class="input" placeholder="your@email.com" required
+              :disabled="loading" />
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label for="phone">Phone Number</label>
-              <input 
-                type="tel" 
-                id="phone" 
-                v-model="form.phone" 
-                class="input"
-                placeholder="+91 9876543210"
-                :disabled="loading"
-              />
+              <input type="tel" id="phone" v-model="form.phone" class="input" placeholder="+91 9876543210"
+                :disabled="loading" />
             </div>
             <div class="form-group">
               <label for="city">City</label>
-              <input 
-                type="text" 
-                id="city" 
-                v-model="form.city" 
-                class="input"
-                placeholder="Mumbai"
-                :disabled="loading"
-              />
+              <input type="text" id="city" v-model="form.city" class="input" placeholder="Mumbai" :disabled="loading" />
             </div>
           </div>
 
+          <!-- Vendor-specific fields -->
+          <template v-if="form.role === 'vendor'">
+            <div class="form-group">
+              <label for="business_name">Business Name *</label>
+              <input type="text" id="business_name" v-model="form.business_name" class="input"
+                placeholder="Your Photography Studio" required :disabled="loading" />
+            </div>
+
+            <div class="form-group">
+              <label for="category">Category *</label>
+              <select id="category" v-model="form.category" class="input" required :disabled="loading">
+                <option value="">Select your category...</option>
+                <option value="photographer">Photographer</option>
+                <option value="videographer">Videographer</option>
+                <option value="decorator">Decorator</option>
+                <option value="caterer">Caterer</option>
+                <option value="dj-music">DJ / Music</option>
+                <option value="makeup-artist">Makeup Artist</option>
+                <option value="florist">Florist</option>
+                <option value="event-planner">Event Planner</option>
+              </select>
+            </div>
+          </template>
+
           <div class="form-group">
             <label for="password">Password</label>
-            <input 
-              type="password" 
-              id="password" 
-              v-model="form.password" 
-              class="input"
-              placeholder="Min 8 characters"
-              required
-              :disabled="loading"
-            />
+            <input type="password" id="password" v-model="form.password" class="input" placeholder="Min 8 characters"
+              required :disabled="loading" />
           </div>
 
           <div class="form-group">
             <label for="password_confirmation">Confirm Password</label>
-            <input 
-              type="password" 
-              id="password_confirmation" 
-              v-model="form.password_confirmation" 
-              class="input"
-              placeholder="Confirm your password"
-              required
-              :disabled="loading"
-            />
+            <input type="password" id="password_confirmation" v-model="form.password_confirmation" class="input"
+              placeholder="Confirm your password" required :disabled="loading" />
           </div>
 
           <div class="form-options">
@@ -125,7 +102,8 @@
         </form>
 
         <div class="auth-footer">
-          <p>Already have an account? <RouterLink to="/login">Sign in</RouterLink></p>
+          <p>Already have an account? <RouterLink to="/login">Sign in</RouterLink>
+          </p>
         </div>
       </div>
     </div>
@@ -154,6 +132,9 @@ const form = ref({
   password_confirmation: '',
   role: 'client',
   terms: false,
+  // Vendor-specific
+  business_name: '',
+  category: '',
 })
 
 const loading = ref(false)
@@ -184,7 +165,7 @@ async function handleRegister() {
   }
 
   try {
-    await authStore.register({
+    const registerData = {
       name: form.value.name,
       email: form.value.email,
       phone: form.value.phone,
@@ -192,7 +173,15 @@ async function handleRegister() {
       password: form.value.password,
       password_confirmation: form.value.password_confirmation,
       role: form.value.role,
-    })
+    }
+
+    // Add vendor fields if registering as vendor
+    if (form.value.role === 'vendor') {
+      registerData.business_name = form.value.business_name
+      registerData.category = form.value.category
+    }
+
+    await authStore.register(registerData)
 
     showToast('Account created successfully!', 'success')
     router.push('/dashboard')

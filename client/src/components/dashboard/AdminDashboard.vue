@@ -189,6 +189,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { adminApi } from '../../services/api'
 import { useRouter } from 'vue-router'
+import { showInfo } from '../../utils/sweetalert'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -236,28 +237,28 @@ function manageVendors() {
 }
 
 function manageUsers() {
-  alert('Manage Users functionality will be available in the next update')
+  router.push('/admin/users')
 }
 
 function manageCategories() {
-  alert('Manage Categories functionality will be available in the next update')
+  router.push('/admin/categories')
 }
 
 function viewReports() {
-  alert('Reports functionality will be available in the next update')
+  router.push('/admin/reports')
 }
 
 function viewAuditLog() {
-  alert('Audit Log functionality will be available in the next update')
+  router.push('/admin/audit-log')
 }
 
 function platformSettings() {
-  alert('Platform Settings functionality will be available in the next update')
+  router.push('/admin/settings')
 }
 
 function viewAllBookings() {
   // router.push('/admin/bookings')
-  alert('View All Bookings functionality will be available in the next update')
+  showInfo('Coming Soon!', 'View All Bookings functionality will be available in the next update')
 }
 
 async function fetchDashboardData() {

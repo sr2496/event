@@ -12,6 +12,11 @@ import Bookings from './views/Bookings.vue'
 import BookingDetail from './views/BookingDetail.vue'
 import CreateBooking from './views/CreateBooking.vue'
 import ManageVendors from './views/ManageVendors.vue'
+import Reports from './views/Reports.vue'
+import AuditLog from './views/AuditLog.vue'
+import ManageUsers from './views/ManageUsers.vue'
+import ManageCategories from './views/ManageCategories.vue'
+import Settings from './views/Settings.vue'
 
 const routes = [
     {
@@ -73,6 +78,36 @@ const routes = [
         name: 'admin-vendors',
         component: ManageVendors,
         meta: { title: 'Manage Vendors', requiresAuth: true, requiresRole: 'admin' }
+    },
+    {
+        path: '/admin/reports',
+        name: 'admin-reports',
+        component: Reports,
+        meta: { title: 'Platform Reports', requiresAuth: true, requiresRole: 'admin' }
+    },
+    {
+        path: '/admin/audit-log',
+        name: 'admin-audit-log',
+        component: AuditLog,
+        meta: { title: 'Audit Log', requiresAuth: true, requiresRole: 'admin' }
+    },
+    {
+        path: '/admin/users',
+        name: 'admin-users',
+        component: ManageUsers,
+        meta: { title: 'Manage Users', requiresAuth: true, requiresRole: 'admin' }
+    },
+    {
+        path: '/admin/categories',
+        name: 'admin-categories',
+        component: ManageCategories,
+        meta: { title: 'Manage Categories', requiresAuth: true, requiresRole: 'admin' }
+    },
+    {
+        path: '/admin/settings',
+        name: 'admin-settings',
+        component: Settings,
+        meta: { title: 'Platform Settings', requiresAuth: true, requiresRole: 'admin' }
     },
 ]
 

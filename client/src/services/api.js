@@ -92,6 +92,18 @@ export const adminApi = {
     suspendVendor: (id, reason) => api.post(`/admin/vendors/${id}/suspend`, { reason }),
     getEmergencies: (params) => api.get('/admin/emergencies', { params }),
     overrideBackup: (id, data) => api.post(`/admin/emergencies/${id}/override`, data),
+    getReports: (params) => api.get('/admin/reports', { params }),
+    getAuditLog: (params) => api.get('/admin/audit-log', { params }),
+    // Users
+    getUsers: (params) => api.get('/admin/users', { params }),
+    toggleUserStatus: (id) => api.post(`/admin/users/${id}/toggle-status`),
+    // Categories
+    getCategories: () => api.get('/admin/categories'),
+    createCategory: (data) => api.post('/admin/categories', data),
+    updateCategory: (id, data) => api.put(`/admin/categories/${id}`, data),
+    // Settings
+    getSettings: () => api.get('/admin/settings'),
+    updateSettings: (data) => api.put('/admin/settings', data),
 }
 
 export default api

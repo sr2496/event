@@ -97,5 +97,12 @@ Route::middleware('auth:sanctum')->group(function () {
         
         // Audit Log
         Route::get('/audit-log', [AdminController::class, 'auditLog']);
+        
+        // Reports
+        Route::get('/reports', [AdminController::class, 'reports']);
+        
+        // Settings
+        Route::get('/settings', [AdminController::class, 'getSettings']);
+        Route::put('/settings', [AdminController::class, 'updateSettings']);
     });
 });

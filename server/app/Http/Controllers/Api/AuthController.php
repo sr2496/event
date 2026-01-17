@@ -21,6 +21,9 @@ class AuthController extends Controller
             'role' => ['sometimes', 'in:client,vendor'],
             'phone' => ['nullable', 'string', 'max:20'],
             'city' => ['nullable', 'string', 'max:100'],
+            // Vendor-specific fields
+            'business_name' => ['required_if:role,vendor', 'nullable', 'string', 'max:255'],
+            'category' => ['required_if:role,vendor', 'nullable', 'string', 'max:100'],
         ]);
 
         $user = User::create([
@@ -35,11 +38,31 @@ class AuthController extends Controller
         $role = $validated['role'] ?? 'client';
         $user->assignRole($role);
 
+        // Create Vendor record if registering as vendor
+        if ($role === 'vendor') {
+            \App\Models\Vendor::create([
+                'user_id' => $user->id,
+                'business_name' => $validated['business_name'],
+                'slug' => \Illuminate\Support\Str::slug($validated['business_name']) . '-' . $user->id,
+                'category' => $validated['category'],
+                'city' => $validated['city'] ?? null,
+                'is_verified' => false, // Requires admin approval
+                'is_active' => true,
+                'reliability_score' => 5.0, // Default score
+                'backup_ready' => false,
+                'accepts_emergency' => false,
+            ]);
+        }
+
         $token = $user->createToken('auth-token')->plainTextToken;
 
+        $message = $role === 'vendor' 
+            ? 'Registration successful! Your vendor account is pending verification by admin.'
+            : 'Registration successful';
+
         return response()->json([
-            'message' => 'Registration successful',
-            'user' => new UserResource($user),
+            'message' => $message,
+            'user' => new UserResource($user->load('vendor')),
             'token' => $token,
         ], 201);
     }

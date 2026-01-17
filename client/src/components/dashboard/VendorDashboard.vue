@@ -15,6 +15,15 @@
         </div>
       </div>
 
+      <!-- Pending Verification Banner -->
+      <div v-if="!isVerified" class="verification-banner">
+        <div class="banner-icon">⏳</div>
+        <div class="banner-content">
+          <h3>Account Pending Verification</h3>
+          <p>Your vendor account is under review. You won't receive bookings until verified by admin.</p>
+        </div>
+      </div>
+
       <!-- Reliability Score Card -->
       <div class="reliability-card card">
         <div class="reliability-main">
@@ -78,7 +87,7 @@
           <div class="section-header">
             <h2>📋 Upcoming Assignments</h2>
           </div>
-          
+
           <div v-if="loading" class="loading-state">
             <div class="spinner"></div>
           </div>
@@ -116,7 +125,7 @@
           <div class="section-header">
             <h2>🚨 Emergency Requests</h2>
           </div>
-          
+
           <div v-if="emergencyRequests.length" class="emergency-list">
             <div v-for="emergency in emergencyRequests" :key="emergency.id" class="emergency-card card">
               <div class="emergency-badge">URGENT</div>
@@ -192,6 +201,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { vendorAccountApi } from '../../services/api'
 import { useRouter } from 'vue-router'
+import { showInfo, showConfirm } from '../../utils/sweetalert'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -212,6 +222,7 @@ const totalEarnings = ref(0)
 const pendingEmergencies = ref(0)
 const assignments = ref([])
 const emergencyRequests = ref([])
+const isVerified = ref(true) // Default to true, update from API
 
 function getScoreBadge(score) {
   if (score >= 4.5) return 'excellent'
@@ -233,34 +244,40 @@ function formatAmount(amount) {
 }
 
 function editProfile() {
-  alert('Edit Profile - Coming Soon!')
+  showInfo('Coming Soon!', 'Edit Profile feature will be available in the next update')
 }
 
 function managePortfolio() {
-  alert('Manage Portfolio - Coming Soon!')
+  showInfo('Coming Soon!', 'Manage Portfolio feature will be available in the next update')
 }
 
 function manageAvailability() {
-  alert('Manage Availability - Coming Soon!')
+  showInfo('Coming Soon!', 'Manage Availability feature will be available in the next update')
 }
 
 function viewEarnings() {
-  alert('View Earnings - Coming Soon!')
+  showInfo('Coming Soon!', 'View Earnings feature will be available in the next update')
 }
 
-function acceptEmergency(id) {
-  alert(`Accept Emergency ${id} - Coming Soon!`)
+async function acceptEmergency(id) {
+  const confirmed = await showConfirm('Accept Emergency Request?', 'You will be assigned to this event as a backup vendor.', 'Accept', 'Cancel')
+  if (confirmed) {
+    showInfo('Coming Soon!', `Emergency acceptance for ID ${id} will be available soon`)
+  }
 }
 
-function rejectEmergency(id) {
-  alert(`Reject Emergency ${id} - Coming Soon!`)
+async function rejectEmergency(id) {
+  const confirmed = await showConfirm('Decline Emergency Request?', 'Are you sure you want to decline this emergency request?', 'Decline', 'Cancel')
+  if (confirmed) {
+    showInfo('Coming Soon!', `Emergency rejection for ID ${id} will be available soon`)
+  }
 }
 
 onMounted(async () => {
   loading.value = true
   try {
     const { data } = await vendorAccountApi.getDashboard()
-    
+
     // Stats
     reliabilityScore.value = data.stats.reliability_score || 0
     stats.value = {
@@ -269,15 +286,17 @@ onMounted(async () => {
       noShows: data.stats.no_shows,
       emergencyAccepts: data.stats.emergency_accepts
     }
-    
+
     upcomingEvents.value = data.stats.upcoming_events
     totalEarnings.value = data.stats.total_earnings
     pendingEmergencies.value = data.stats.emergency_requests
-    
+
     // Lists
     assignments.value = data.upcoming_assignments
     emergencyRequests.value = data.emergency_requests_list
-    
+    // Vendor verification status
+    isVerified.value = data.vendor?.is_verified ?? true
+
   } catch (err) {
     console.error('Failed to load vendor dashboard', err)
   } finally {
@@ -296,6 +315,33 @@ onMounted(async () => {
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 32px;
+}
+
+/* Verification Banner */
+.verification-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(251, 191, 36, 0.1));
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius-xl);
+  margin-bottom: 32px;
+}
+
+.banner-icon {
+  font-size: 2rem;
+}
+
+.banner-content h3 {
+  font-size: 1rem;
+  color: var(--warning-700);
+  margin-bottom: 4px;
+}
+
+.banner-content p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
 }
 
 .role-badge {
@@ -349,10 +395,21 @@ onMounted(async () => {
   color: white;
 }
 
-.score-circle.score-excellent { background: linear-gradient(135deg, #10b981, #34d399); }
-.score-circle.score-good { background: linear-gradient(135deg, #22c55e, #86efac); }
-.score-circle.score-average { background: linear-gradient(135deg, #f59e0b, #fcd34d); }
-.score-circle.score-poor { background: linear-gradient(135deg, #ef4444, #fca5a5); }
+.score-circle.score-excellent {
+  background: linear-gradient(135deg, #10b981, #34d399);
+}
+
+.score-circle.score-good {
+  background: linear-gradient(135deg, #22c55e, #86efac);
+}
+
+.score-circle.score-average {
+  background: linear-gradient(135deg, #f59e0b, #fcd34d);
+}
+
+.score-circle.score-poor {
+  background: linear-gradient(135deg, #ef4444, #fca5a5);
+}
 
 .reliability-info h2 {
   font-size: 1.25rem;
@@ -411,7 +468,9 @@ onMounted(async () => {
   border-color: rgba(239, 68, 68, 0.2);
 }
 
-.stat-icon { font-size: 2.5rem; }
+.stat-icon {
+  font-size: 2.5rem;
+}
 
 .stat-content {
   display: flex;
@@ -521,8 +580,15 @@ onMounted(async () => {
   text-transform: capitalize;
 }
 
-.status-confirmed { background: var(--success-50); color: var(--success-600); }
-.status-pending { background: var(--warning-50); color: var(--warning-600); }
+.status-confirmed {
+  background: var(--success-50);
+  color: var(--success-600);
+}
+
+.status-pending {
+  background: var(--warning-50);
+  color: var(--warning-600);
+}
 
 /* Emergency */
 .emergency-list {
@@ -647,7 +713,9 @@ onMounted(async () => {
   box-shadow: var(--shadow-md);
 }
 
-.action-icon { font-size: 2rem; }
+.action-icon {
+  font-size: 2rem;
+}
 
 .action-label {
   font-size: 0.9rem;
@@ -687,10 +755,25 @@ onMounted(async () => {
 }
 
 @media (max-width: 1024px) {
-  .reliability-card { flex-direction: column; align-items: flex-start; }
-  .dashboard-grid { grid-template-columns: 1fr; }
-  .stats-grid { grid-template-columns: 1fr; }
-  .actions-grid { grid-template-columns: repeat(2, 1fr); }
-  .tips-content ul { grid-template-columns: 1fr; }
+  .reliability-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .tips-content ul {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
