@@ -1,0 +1,798 @@
+name: Payouts
+description: |-
+
+  APIs for managing vendor payouts. Vendors can view earnings, request payouts, and track payout history.
+  Admins can process and manage all payouts.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/vendor/payouts/summary
+    metadata:
+      custom: []
+      groupName: Payouts
+      groupDescription: |-
+
+        APIs for managing vendor payouts. Vendors can view earnings, request payouts, and track payout history.
+        Admins can process and manage all payouts.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Get earnings summary'
+      description: "Get the vendor's earnings summary including balances and payout eligibility."
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer Bearer {YOUR_ACCESS_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-allow-credentials: 'true'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/vendor/payouts/earnings
+    metadata:
+      custom: []
+      groupName: Payouts
+      groupDescription: |-
+
+        APIs for managing vendor payouts. Vendors can view earnings, request payouts, and track payout history.
+        Admins can process and manage all payouts.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Get earnings history'
+      description: 'List all earnings for the authenticated vendor.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer Bearer {YOUR_ACCESS_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      status:
+        custom: []
+        name: status
+        description: 'Filter by status: pending, available, paid.'
+        required: false
+        example: available
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      per_page:
+        custom: []
+        name: per_page
+        description: 'Results per page.'
+        required: false
+        example: 15
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      status: available
+      per_page: 15
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-allow-credentials: 'true'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/vendor/payouts/history
+    metadata:
+      custom: []
+      groupName: Payouts
+      groupDescription: |-
+
+        APIs for managing vendor payouts. Vendors can view earnings, request payouts, and track payout history.
+        Admins can process and manage all payouts.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Get payout history'
+      description: 'List all payout requests for the authenticated vendor.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer Bearer {YOUR_ACCESS_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      status:
+        custom: []
+        name: status
+        description: 'Filter by status: pending, processing, completed, failed, cancelled.'
+        required: false
+        example: completed
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      per_page:
+        custom: []
+        name: per_page
+        description: 'Results per page.'
+        required: false
+        example: 15
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      status: completed
+      per_page: 15
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-allow-credentials: 'true'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/vendor/payouts/{id}'
+    metadata:
+      custom: []
+      groupName: Payouts
+      groupDescription: |-
+
+        APIs for managing vendor payouts. Vendors can view earnings, request payouts, and track payout history.
+        Admins can process and manage all payouts.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Get single payout details'
+      description: 'Get details of a specific payout request.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer Bearer {YOUR_ACCESS_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The payout ID.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-allow-credentials: 'true'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: api/vendor/payouts/bank-details
+    metadata:
+      custom: []
+      groupName: Payouts
+      groupDescription: |-
+
+        APIs for managing vendor payouts. Vendors can view earnings, request payouts, and track payout history.
+        Admins can process and manage all payouts.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Update bank details'
+      description: "Update the vendor's bank account details for payouts."
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer Bearer {YOUR_ACCESS_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      account_holder_name:
+        custom: []
+        name: account_holder_name
+        description: 'Account holder name.'
+        required: true
+        example: 'John Doe'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      account_number:
+        custom: []
+        name: account_number
+        description: 'Bank account number.'
+        required: true
+        example: '1234567890'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      ifsc_code:
+        custom: []
+        name: ifsc_code
+        description: 'IFSC code.'
+        required: true
+        example: HDFC0001234
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      bank_name:
+        custom: []
+        name: bank_name
+        description: 'Bank name.'
+        required: true
+        example: 'HDFC Bank'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      upi_id:
+        custom: []
+        name: upi_id
+        description: 'optional UPI ID for instant transfers.'
+        required: false
+        example: john@upi
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      account_holder_name: 'John Doe'
+      account_number: '1234567890'
+      ifsc_code: HDFC0001234
+      bank_name: 'HDFC Bank'
+      upi_id: john@upi
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/vendor/payouts/request
+    metadata:
+      custom: []
+      groupName: Payouts
+      groupDescription: |-
+
+        APIs for managing vendor payouts. Vendors can view earnings, request payouts, and track payout history.
+        Admins can process and manage all payouts.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Request a payout'
+      description: 'Request a payout of available balance.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer Bearer {YOUR_ACCESS_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      amount:
+        custom: []
+        name: amount
+        description: 'optional Specific amount to withdraw (defaults to full available balance).'
+        required: false
+        example: 5000.0
+        type: number
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        deprecated: false
+      payment_method:
+        custom: []
+        name: payment_method
+        description: 'optional Preferred payment method: bank_transfer, upi.'
+        required: false
+        example: bank_transfer
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      amount: 5000.0
+      payment_method: bank_transfer
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/vendor/payouts/{id}/cancel'
+    metadata:
+      custom: []
+      groupName: Payouts
+      groupDescription: |-
+
+        APIs for managing vendor payouts. Vendors can view earnings, request payouts, and track payout history.
+        Admins can process and manage all payouts.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Cancel payout request'
+      description: 'Cancel a pending payout request.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer Bearer {YOUR_ACCESS_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The payout ID.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/admin/payouts
+    metadata:
+      custom: []
+      groupName: Payouts
+      groupDescription: |-
+
+        APIs for managing vendor payouts. Vendors can view earnings, request payouts, and track payout history.
+        Admins can process and manage all payouts.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'List all payouts (Admin)'
+      description: 'List all payout requests with filtering options.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer Bearer {YOUR_ACCESS_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      status:
+        custom: []
+        name: status
+        description: 'Filter by status.'
+        required: false
+        example: pending
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      vendor_id:
+        custom: []
+        name: vendor_id
+        description: 'Filter by vendor.'
+        required: false
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      per_page:
+        custom: []
+        name: per_page
+        description: 'Results per page.'
+        required: false
+        example: 20
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      status: pending
+      vendor_id: 1
+      per_page: 20
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-allow-credentials: 'true'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/admin/payouts/{id}'
+    metadata:
+      custom: []
+      groupName: Payouts
+      groupDescription: |-
+
+        APIs for managing vendor payouts. Vendors can view earnings, request payouts, and track payout history.
+        Admins can process and manage all payouts.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Get payout details (Admin)'
+      description: 'Get full details of a payout including earnings breakdown.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer Bearer {YOUR_ACCESS_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The payout ID.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-allow-credentials: 'true'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/admin/payouts/{id}/process'
+    metadata:
+      custom: []
+      groupName: Payouts
+      groupDescription: |-
+
+        APIs for managing vendor payouts. Vendors can view earnings, request payouts, and track payout history.
+        Admins can process and manage all payouts.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Process payout (Admin)'
+      description: 'Mark a payout as processing (being worked on).'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer Bearer {YOUR_ACCESS_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The payout ID.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/admin/payouts/{id}/complete'
+    metadata:
+      custom: []
+      groupName: Payouts
+      groupDescription: |-
+
+        APIs for managing vendor payouts. Vendors can view earnings, request payouts, and track payout history.
+        Admins can process and manage all payouts.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Complete payout (Admin)'
+      description: 'Mark a payout as completed after transfer.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer Bearer {YOUR_ACCESS_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The payout ID.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      transaction_reference:
+        custom: []
+        name: transaction_reference
+        description: 'External transaction/reference ID.'
+        required: true
+        example: TXN123456789
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      notes:
+        custom: []
+        name: notes
+        description: 'optional Admin notes.'
+        required: false
+        example: 'Transferred via NEFT'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      transaction_reference: TXN123456789
+      notes: 'Transferred via NEFT'
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/admin/payouts/{id}/fail'
+    metadata:
+      custom: []
+      groupName: Payouts
+      groupDescription: |-
+
+        APIs for managing vendor payouts. Vendors can view earnings, request payouts, and track payout history.
+        Admins can process and manage all payouts.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Fail payout (Admin)'
+      description: 'Mark a payout as failed.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer Bearer {YOUR_ACCESS_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The payout ID.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      reason:
+        custom: []
+        name: reason
+        description: 'Reason for failure.'
+        required: true
+        example: 'Invalid bank account details'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      reason: 'Invalid bank account details'
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null

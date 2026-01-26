@@ -2,6 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+/**
+ * @group Bookings
+ *
+ * APIs for creating and managing event bookings. Clients can create bookings, confirm payments, and cancel events.
+ */
+
 use App\Http\Controllers\Controller;
 use App\Http\Resources\EventResource;
 use App\Models\Event;

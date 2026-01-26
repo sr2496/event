@@ -2,6 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
+/**
+ * @group Emergency
+ *
+ * APIs for handling emergency situations when vendors fail to show up. Includes triggering emergencies and backup vendor responses.
+ * @authenticated
+ */
+
 use App\Http\Controllers\Controller;
 use App\Http\Resources\EventResource;
 use App\Models\Event;

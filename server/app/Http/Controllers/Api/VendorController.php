@@ -2,6 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+/**
+ * @group Vendors
+ *
+ * APIs for browsing vendors, managing vendor profiles, and vendor dashboard operations.
+ */
+
 use App\Http\Controllers\Controller;
 use App\Http\Resources\VendorResource;
 use App\Http\Resources\VendorDetailResource;
@@ -9,6 +15,8 @@ use App\Models\Vendor;
 use App\Models\VendorProfile;
 use App\Models\VendorPortfolio;
 use App\Models\Category;
+use App\Models\Event;
+use App\Services\BookingService;
 use Illuminate\Http\Request;
 
 class VendorController extends Controller
@@ -163,7 +171,7 @@ class VendorController extends Controller
         $backupStandby = $vendor->backupAssignments()
             ->standby()
             ->count();
-            
+
         // Calculate Total Earnings (completed events)
         $totalEarnings = $vendor->eventVendors()
             ->where('status', 'completed')
@@ -187,8 +195,6 @@ class VendorController extends Controller
             });
 
         // Emergency Requests (Notified backups)
-        // We look for backup assignments where status is 'notified'
-        // And match them with the emergency request details
         $emergencyRequests = $vendor->backupAssignments()
             ->with(['emergencyRequest.event'])
             ->where('status', 'notified')
@@ -202,7 +208,7 @@ class VendorController extends Controller
                     'event_title' => $event ? $event->title : 'Unknown Event',
                     'event_date' => $event ? $event->event_date->toDateString() : '',
                     'city' => $event ? $event->city : '',
-                    'category' => $er ? 'Service' : 'Unknown', // Ideally get needed category
+                    'category' => $er ? 'Service' : 'Unknown',
                     'payout' => 5000, // Placeholder or calculated from event budget
                 ];
             });
@@ -325,25 +331,6 @@ class VendorController extends Controller
             'message' => 'Portfolio image deleted successfully',
         ]);
     }
-}
-<?php
-
-namespace App\Http\Controllers\Api;
-
-// ... (existing imports)
-use App\Models\Event;
-use App\Services\BookingService;
-
-// ...
-
-    protected BookingService $bookingService;
-
-    public function __construct(BookingService $bookingService)
-    {
-        $this->bookingService = $bookingService;
-    }
-
-    // ... (append to class)
 
     public function getPendingRequests(Request $request)
     {
@@ -370,7 +357,7 @@ use App\Services\BookingService;
                     'client_name' => $ev->event->client->name,
                     'budget' => $ev->agreed_price,
                     // calculate payout (minus commission)
-                    'payout' => $ev->agreed_price * 0.90, 
+                    'payout' => $ev->agreed_price * 0.90,
                 ];
             });
 

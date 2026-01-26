@@ -2,6 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+/**
+ * @group Authentication
+ *
+ * APIs for user authentication and profile management.
+ */
+
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Models\User;

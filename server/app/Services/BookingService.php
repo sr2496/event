@@ -4,12 +4,18 @@ namespace App\Services;
 
 use App\Models\Event;
 use App\Models\Vendor;
+use App\Models\VendorPackage;
 use App\Models\EventVendor;
 use App\Models\BackupAssignment;
 use App\Models\Payment;
 use App\Models\VendorAvailability;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use App\Notifications\BookingCreatedNotification;
+use App\Notifications\BookingConfirmedNotification;
+use App\Notifications\BookingRejectedNotification;
+use App\Notifications\BookingCancelledNotification;
+use App\Notifications\PaymentConfirmedNotification;
 
 class BookingService
 {
@@ -22,8 +28,23 @@ class BookingService
     public function createBooking(User $client, Vendor $vendor, array $data): array
     {
         return DB::transaction(function () use ($client, $vendor, $data) {
-            // Calculate pricing
-            $vendorPrice = $vendor->min_price ?? 10000; // Default for calculation
+            // Handle package selection
+            $package = null;
+            $packageSnapshot = null;
+
+            if (!empty($data['package_id'])) {
+                $package = VendorPackage::where('id', $data['package_id'])
+                    ->where('vendor_id', $vendor->id)
+                    ->active()
+                    ->first();
+
+                if ($package) {
+                    $packageSnapshot = $package->toSnapshot();
+                }
+            }
+
+            // Calculate pricing - use package price if selected, otherwise vendor min_price
+            $vendorPrice = $package ? $package->price : ($vendor->min_price ?? 10000);
             $assuranceFee = max(self::MIN_ASSURANCE_FEE, $vendorPrice * (self::ASSURANCE_FEE_PERCENTAGE / 100));
             $platformCommission = $vendorPrice * (self::BOOKING_COMMISSION_PERCENTAGE / 100);
             $advancePayment = $vendorPrice * 0.3; // 30% advance
@@ -31,6 +52,8 @@ class BookingService
             // Create event
             $event = Event::create([
                 'client_id' => $client->id,
+                'package_id' => $package?->id,
+                'package_snapshot' => $packageSnapshot,
                 'title' => $data['title'],
                 'type' => $data['type'],
                 'event_date' => $data['event_date'],
@@ -46,6 +69,11 @@ class BookingService
                 'platform_commission' => $platformCommission,
             ]);
 
+            // Increment package bookings count
+            if ($package) {
+                $package->incrementBookings();
+            }
+
             // Create primary vendor assignment
             $eventVendor = EventVendor::create([
                 'event_id' => $event->id,
@@ -56,7 +84,6 @@ class BookingService
                 'special_requirements' => $data['special_requirements'] ?? null,
             ]);
 
-            // Create payment records
             // Create payment records (Only Assurance Fee initially)
             Payment::create([
                 'event_id' => $event->id,
@@ -66,10 +93,11 @@ class BookingService
                 'status' => 'pending',
             ]);
 
-
-
             // Silently assign backup vendors
             $this->assignBackupVendors($event, $eventVendor, $vendor);
+
+            // Notify vendor of new booking
+            $vendor->user->notify(new BookingCreatedNotification($event));
 
             return [
                 'event' => $event,
@@ -141,12 +169,18 @@ class BookingService
                  $event->update(['status' => 'awaiting_vendor']);
             } elseif ($paymentType === 'advance') {
                  $event->update(['status' => 'confirmed']);
-                 
+
                  // Confirm primary vendor
                  $primaryVendor = $event->eventVendors()->primary()->first();
                  if ($primaryVendor) {
                     $primaryVendor->confirm();
                  }
+            }
+
+            // Notify vendor of payment confirmation
+            $primaryVendor = $event->primaryVendor;
+            if ($primaryVendor && $primaryVendor->vendor && $primaryVendor->vendor->user) {
+                $primaryVendor->vendor->user->notify(new PaymentConfirmedNotification($event, $paymentType));
             }
         });
     }
@@ -189,16 +223,15 @@ class BookingService
                     'notes' => 'Refund for cancelled booking',
                 ]);
             }
+
+            // Notify vendors of cancellation
+            foreach ($event->eventVendors as $eventVendor) {
+                if ($eventVendor->vendor && $eventVendor->vendor->user) {
+                    $eventVendor->vendor->user->notify(new BookingCancelledNotification($event, $reason));
+                }
+            }
         });
     }
-}
-<?php
-
-namespace App\Services;
-
-// ... (existing imports)
-
-    // ... (append to class)
 
     public function vendorAccept(Event $event): void
     {
@@ -223,6 +256,9 @@ namespace App\Services;
                 'amount' => $advancePayment,
                 'status' => 'pending',
             ]);
+
+            // Notify client of vendor acceptance
+            $event->client->notify(new BookingConfirmedNotification($event));
         });
     }
 
@@ -250,6 +286,9 @@ namespace App\Services;
                     'notes' => 'Refund for vendor rejection',
                 ]);
             }
+
+            // Notify client of vendor rejection
+            $event->client->notify(new BookingRejectedNotification($event, $reason));
         });
     }
 }

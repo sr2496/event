@@ -68,8 +68,7 @@ class BackupAssignment extends Model
             'status' => 'notified',
             'notified_at' => now(),
         ]);
-        
-        // TODO: Send notification to backup vendor
+        // Notification is dispatched in EmergencyService::notifyNextBackup()
     }
 
     public function accept(): void

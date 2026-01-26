@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Notifications\EventCompletedNotification;
+use App\Models\VendorEarning;
 
 class Event extends Model
 {
@@ -15,6 +17,8 @@ class Event extends Model
 
     protected $fillable = [
         'client_id',
+        'package_id',
+        'package_snapshot',
         'title',
         'type',
         'event_date',
@@ -41,12 +45,18 @@ class Event extends Model
         'platform_commission' => 'decimal:2',
         'has_emergency' => 'boolean',
         'completed_at' => 'datetime',
+        'package_snapshot' => 'array',
     ];
 
     // Relationships
     public function client(): BelongsTo
     {
         return $this->belongsTo(User::class, 'client_id');
+    }
+
+    public function package(): BelongsTo
+    {
+        return $this->belongsTo(VendorPackage::class, 'package_id');
     }
 
     public function eventVendors(): HasMany
@@ -77,6 +87,11 @@ class Event extends Model
     public function emergencyRequests(): HasMany
     {
         return $this->hasMany(EmergencyRequest::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
     }
 
     // Scopes
@@ -130,12 +145,39 @@ class Event extends Model
             'completed_at' => now(),
         ]);
 
-        // Update vendor stats
+        // Update vendor stats, create earnings, and notify vendors
         foreach ($this->eventVendors as $eventVendor) {
             if ($eventVendor->status === 'confirmed') {
-                $eventVendor->vendor->increment('total_events_completed');
-                $eventVendor->vendor->updateReliabilityScore(0.1, 'event_completed', $this->id);
+                $vendor = $eventVendor->vendor;
+
+                // Update vendor stats
+                $vendor->increment('total_events_completed');
+                $vendor->updateReliabilityScore(0.1, 'event_completed', $this->id);
                 $eventVendor->update(['status' => 'completed']);
+
+                // Create vendor earning record
+                $grossAmount = $eventVendor->agreed_price;
+                $commissionRate = $eventVendor->role === 'emergency_replacement' ? 0.20 : 0.10;
+                $commission = $grossAmount * $commissionRate;
+                $netAmount = $grossAmount - $commission;
+
+                $earning = VendorEarning::create([
+                    'vendor_id' => $vendor->id,
+                    'event_id' => $this->id,
+                    'event_vendor_id' => $eventVendor->id,
+                    'gross_amount' => $grossAmount,
+                    'platform_commission' => $commission,
+                    'net_amount' => $netAmount,
+                    'status' => 'pending', // Becomes available after settlement period
+                ]);
+
+                // Update vendor pending balance
+                $vendor->increment('pending_balance', $netAmount);
+
+                // Notify vendor of event completion
+                if ($vendor->user) {
+                    $vendor->user->notify(new EventCompletedNotification($this));
+                }
             }
         }
     }

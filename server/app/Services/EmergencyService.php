@@ -9,6 +9,8 @@ use App\Models\EmergencyRequest;
 use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use App\Notifications\EmergencyBackupRequestNotification;
+use App\Notifications\EmergencyResolvedNotification;
 
 class EmergencyService
 {
@@ -56,10 +58,12 @@ class EmergencyService
 
         if ($nextBackup) {
             $nextBackup->notify();
-            
-            // TODO: Send actual notification (email, SMS, push)
-            // This would typically dispatch a job
-            
+
+            // Send notification to backup vendor
+            if ($nextBackup->backupVendor && $nextBackup->backupVendor->user) {
+                $nextBackup->backupVendor->user->notify(new EmergencyBackupRequestNotification($nextBackup));
+            }
+
             return $nextBackup;
         }
 
@@ -104,6 +108,12 @@ class EmergencyService
             if ($emergencyRequest) {
                 $emergencyRequest->assignBackup($assignment->backup_vendor_id);
                 $emergencyRequest->resolve('Backup vendor accepted: ' . $assignment->backupVendor->business_name);
+
+                // Notify client that emergency has been resolved
+                $event = $assignment->event;
+                if ($event->client) {
+                    $event->client->notify(new EmergencyResolvedNotification($emergencyRequest, $assignment));
+                }
             }
 
             // Expire other pending backup assignments for this event

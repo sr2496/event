@@ -2,6 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+/**
+ * @group Admin
+ *
+ * APIs for platform administration. Includes vendor verification, emergency management, user management, and reporting.
+ * Requires admin role.
+ * @authenticated
+ */
+
 use App\Http\Controllers\Controller;
 use App\Http\Resources\VendorResource;
 use App\Http\Resources\EventResource;
